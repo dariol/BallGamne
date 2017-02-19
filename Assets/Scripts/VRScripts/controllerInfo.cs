@@ -61,7 +61,7 @@ public class controllerInfo : MonoBehaviour{
       thumbVelocity = new Vector2( 0 , 0 );
     }
 
-    var axis = device.GetState().rAxis[1];
+    var axis = device.GetState ().rAxis1;
 
     triggerVal = axis.x;
     //print( axis.x );

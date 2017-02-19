@@ -1,3 +1,6 @@
+// Upgrade NOTE: replaced '_Object2World' with 'unity_ObjectToWorld'
+// Upgrade NOTE: replaced '_World2Object' with 'unity_WorldToObject'
+
 Shader "Custom/PlanetMomma" {
  Properties {
   
@@ -262,10 +265,10 @@ Shader "Custom/PlanetMomma" {
         // Getting the position for actual position
         o.pos = mul( UNITY_MATRIX_MVP , v.position );
      
-        float3 mPos = mul( _Object2World , v.position );
+        float3 mPos = mul( unity_ObjectToWorld , v.position );
 
         o.ro = v.position;
-        o.camPos = mul( _World2Object , float4( _WorldSpaceCameraPos  , 1. )); 
+        o.camPos = mul( unity_WorldToObject , float4( _WorldSpaceCameraPos  , 1. )); 
 
         return o;
 
@@ -291,7 +294,7 @@ Shader "Custom/PlanetMomma" {
           float3 nor = calcNormal( pos );
           
           
-          nor = mul(  nor, (float3x3)_World2Object ); 
+          nor = mul(  nor, (float3x3)unity_WorldToObject ); 
           nor = normalize( nor );
           col = nor * .5 + .5;
 

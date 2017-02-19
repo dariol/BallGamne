@@ -1,4 +1,4 @@
-﻿//========= Copyright 2014, Valve Corporation, All rights reserved. ===========
+﻿//======= Copyright (c) Valve Corporation, All rights reserved. ===============
 //
 // Purpose: Utilities for working with SteamVR
 //
@@ -11,44 +11,6 @@ using Valve.VR;
 
 public static class SteamVR_Utils
 {
-	public class Event
-	{
-		public delegate void Handler(params object[] args);
-
-		public static void Listen(string message, Handler action)
-		{
-			var actions = listeners[message] as Handler;
-			if (actions != null)
-			{
-				listeners[message] = actions + action;
-			}
-			else
-			{
-				listeners[message] = action;
-			}
-		}
-
-		public static void Remove(string message, Handler action)
-		{
-			var actions = listeners[message] as Handler;
-			if (actions != null)
-			{
-				listeners[message] = actions - action;
-			}
-		}
-
-		public static void Send(string message, params object[] args)
-		{
-			var actions = listeners[message] as Handler;
-			if (actions != null)
-			{
-				actions(args);
-			}
-		}
-
-		private static Hashtable listeners = new Hashtable();
-	}
-
 	// this version does not clamp [0..1]
 	public static Quaternion Slerp(Quaternion A, Quaternion B, float t)
 	{
@@ -209,21 +171,20 @@ public static class SteamVR_Utils
 		{
 			var m = Matrix4x4.identity;
 
-			m[0, 0] =  pose.m[0 * 4 + 0];
-			m[1, 0] =  pose.m[1 * 4 + 0];
-			m[2, 0] = -pose.m[2 * 4 + 0];
+			m[0, 0] =  pose.m0;
+			m[0, 1] =  pose.m1;
+			m[0, 2] = -pose.m2;
+			m[0, 3] =  pose.m3;
 
-			m[0, 1] =  pose.m[0 * 4 + 1];
-			m[1, 1] =  pose.m[1 * 4 + 1];
-			m[2, 1] = -pose.m[2 * 4 + 1];
+			m[1, 0] =  pose.m4;
+			m[1, 1] =  pose.m5;
+			m[1, 2] = -pose.m6;
+			m[1, 3] =  pose.m7;
 
-			m[0, 2] = -pose.m[0 * 4 + 2];
-			m[1, 2] = -pose.m[1 * 4 + 2];
-			m[2, 2] =  pose.m[2 * 4 + 2];
-
-			m[0, 3] =  pose.m[0 * 4 + 3];
-			m[1, 3] =  pose.m[1 * 4 + 3];
-			m[2, 3] = -pose.m[2 * 4 + 3];
+			m[2, 0] = -pose.m8;
+			m[2, 1] = -pose.m9;
+			m[2, 2] =  pose.m10;
+			m[2, 3] = -pose.m11;
 
 			this.pos = m.GetPosition();
 			this.rot = m.GetRotation();
@@ -233,25 +194,25 @@ public static class SteamVR_Utils
 		{
 			var m = Matrix4x4.identity;
 
-			m[0, 0] =  pose.m[0 * 4 + 0];
-			m[1, 0] =  pose.m[1 * 4 + 0];
-			m[2, 0] = -pose.m[2 * 4 + 0];
-			m[3, 0] =  pose.m[3 * 4 + 0];
+			m[0, 0] =  pose.m0;
+			m[0, 1] =  pose.m1;
+			m[0, 2] = -pose.m2;
+			m[0, 3] =  pose.m3;
 
-			m[0, 1] =  pose.m[0 * 4 + 1];
-			m[1, 1] =  pose.m[1 * 4 + 1];
-			m[2, 1] = -pose.m[2 * 4 + 1];
-			m[3, 1] =  pose.m[3 * 4 + 1];
+			m[1, 0] =  pose.m4;
+			m[1, 1] =  pose.m5;
+			m[1, 2] = -pose.m6;
+			m[1, 3] =  pose.m7;
 
-			m[0, 2] = -pose.m[0 * 4 + 2];
-			m[1, 2] = -pose.m[1 * 4 + 2];
-			m[2, 2] =  pose.m[2 * 4 + 2];
-			m[3, 2] = -pose.m[3 * 4 + 2];
+			m[2, 0] = -pose.m8;
+			m[2, 1] = -pose.m9;
+			m[2, 2] =  pose.m10;
+			m[2, 3] = -pose.m11;
 
-			m[0, 3] =  pose.m[0 * 4 + 3];
-			m[1, 3] =  pose.m[1 * 4 + 3];
-			m[2, 3] = -pose.m[2 * 4 + 3];
-			m[3, 3] =  pose.m[3 * 4 + 3];
+			m[3, 0] =  pose.m12;
+			m[3, 1] =  pose.m13;
+			m[3, 2] = -pose.m14;
+			m[3, 3] =  pose.m15;
 
 			this.pos = m.GetPosition();
 			this.rot = m.GetRotation();
@@ -261,27 +222,26 @@ public static class SteamVR_Utils
 		{
 			var m = Matrix4x4.TRS(pos, rot, Vector3.one);
 			var pose = new HmdMatrix44_t();
-			pose.m = new float[16];
 
-			pose.m[0 * 4 + 0] =  m[0, 0];
-			pose.m[1 * 4 + 0] =  m[1, 0];
-			pose.m[2 * 4 + 0] = -m[2, 0];
-			pose.m[3 * 4 + 0] =  m[3, 0];
+			pose.m0  =  m[0, 0];
+            pose.m1  =  m[0, 1];
+			pose.m2  = -m[0, 2];
+			pose.m3  =  m[0, 3];
 
-			pose.m[0 * 4 + 1] =  m[0, 1];
-			pose.m[1 * 4 + 1] =  m[1, 1];
-			pose.m[2 * 4 + 1] = -m[2, 1];
-			pose.m[3 * 4 + 1] =  m[3, 1];
+			pose.m4  =  m[1, 0];
+			pose.m5  =  m[1, 1];
+			pose.m6  = -m[1, 2];
+			pose.m7  =  m[1, 3];
 
-			pose.m[0 * 4 + 2] = -m[0, 2];
-			pose.m[1 * 4 + 2] = -m[1, 2];
-			pose.m[2 * 4 + 2] =  m[2, 2];
-			pose.m[3 * 4 + 2] = -m[3, 2];
+			pose.m8  = -m[2, 0];
+			pose.m9  = -m[2, 1];
+			pose.m10 =  m[2, 2];
+			pose.m11 = -m[2, 3];
 
-			pose.m[0 * 4 + 3] =  m[0, 3];
-			pose.m[1 * 4 + 3] =  m[1, 3];
-			pose.m[2 * 4 + 3] = -m[2, 3];
-			pose.m[3 * 4 + 3] =  m[3, 3];
+			pose.m12 =  m[3, 0];
+			pose.m13 =  m[3, 1];
+			pose.m14 = -m[3, 2];
+			pose.m15 =  m[3, 3];
 
 			return pose;
 		}
@@ -290,23 +250,21 @@ public static class SteamVR_Utils
 		{
 			var m = Matrix4x4.TRS(pos, rot, Vector3.one);
 			var pose = new HmdMatrix34_t();
-			pose.m = new float[16];
 
-			pose.m[0 * 4 + 0] =  m[0, 0];
-			pose.m[1 * 4 + 0] =  m[1, 0];
-			pose.m[2 * 4 + 0] = -m[2, 0];
+			pose.m0  =  m[0, 0];
+            pose.m1  =  m[0, 1];
+			pose.m2  = -m[0, 2];
+			pose.m3  =  m[0, 3];
 
-			pose.m[0 * 4 + 1] =  m[0, 1];
-			pose.m[1 * 4 + 1] =  m[1, 1];
-			pose.m[2 * 4 + 1] = -m[2, 1];
+			pose.m4  =  m[1, 0];
+			pose.m5  =  m[1, 1];
+			pose.m6  = -m[1, 2];
+			pose.m7  =  m[1, 3];
 
-			pose.m[0 * 4 + 2] = -m[0, 2];
-			pose.m[1 * 4 + 2] = -m[1, 2];
-			pose.m[2 * 4 + 2] =  m[2, 2];
-
-			pose.m[0 * 4 + 3] =  m[0, 3];
-			pose.m[1 * 4 + 3] =  m[1, 3];
-			pose.m[2 * 4 + 3] = -m[2, 3];
+			pose.m8  = -m[2, 0];
+			pose.m9  = -m[2, 1];
+			pose.m10 =  m[2, 2];
+			pose.m11 = -m[2, 3];
 
 			return pose;
 		}
@@ -460,44 +418,268 @@ public static class SteamVR_Utils
 		var mesh = new Mesh();
 		mesh.vertices = vertices;
 		mesh.triangles = indices;
+        mesh.bounds = new Bounds( Vector3.zero, new Vector3( float.MaxValue, float.MaxValue, float.MaxValue ) ); // Prevent frustum culling from culling this mesh
 		return mesh;
 	}
 
-	public delegate object SystemFn(IVRSystem system, params object[] args);
+	public delegate object SystemFn(CVRSystem system, params object[] args);
 
 	public static object CallSystemFn(SystemFn fn, params object[] args)
 	{
-		object result = null;
-		if (SteamVR.active)
-		{
-			result = fn(SteamVR.instance.hmd, args);
-		}
-		else
+		var initOpenVR = (!SteamVR.active && !SteamVR.usingNativeSupport);
+		if (initOpenVR)
 		{
 			var error = EVRInitError.None;
-			var pSystem = OpenVR.Init(ref error, EVRApplicationType.VRApplication_Other);
-			if (pSystem != System.IntPtr.Zero && error == EVRInitError.None)
-			{
-				// Make sure we're using the proper version
-				pSystem = OpenVR.GetGenericInterface(OpenVR.IVRSystem_Version, ref error);
-				if (pSystem != System.IntPtr.Zero && error == EVRInitError.None)
-				{
-					var system = new CVRSystem(pSystem);
-					result = fn(system, args);
-				}
-				OpenVR.Shutdown();
-			}
+			OpenVR.Init(ref error, EVRApplicationType.VRApplication_Other);
 		}
+
+		var system = OpenVR.System;
+		var result = (system != null) ? fn(system, args) : null;
+
+		if (initOpenVR)
+			OpenVR.Shutdown();
+
 		return result;
 	}
 
 	public static void QueueEventOnRenderThread(int eventID)
 	{
-#if UNITY_5_0 || UNITY_5_1
+#if (UNITY_5_0 || UNITY_5_1)
 		GL.IssuePluginEvent(eventID);
-#else
-		GL.IssuePluginEvent(Unity.GetRenderEventFunc(), eventID);
+#elif (UNITY_5_2 || UNITY_5_3)
+		GL.IssuePluginEvent(SteamVR.Unity.GetRenderEventFunc(), eventID);
 #endif
+	}
+
+	public static void TakeStereoScreenshot(uint screenshotHandle, GameObject target, int cellSize, float ipd, ref string previewFilename, ref string VRFilename)
+	{
+		const int width = 4096;
+		const int height = width / 2;
+		const int halfHeight = height / 2;
+
+		var texture = new Texture2D(width, height * 2, TextureFormat.ARGB32, false);
+
+		var timer = new System.Diagnostics.Stopwatch();
+
+		Camera tempCamera = null;
+
+		timer.Start();
+
+		var camera = target.GetComponent<Camera>();
+		if (camera == null)
+		{
+			if (tempCamera == null)
+				tempCamera = new GameObject().AddComponent<Camera>();
+			camera = tempCamera;
+		}
+
+		// Render preview texture
+		const int previewWidth = 2048;
+		const int previewHeight = 2048;
+		var previewTexture = new Texture2D(previewWidth, previewHeight, TextureFormat.ARGB32, false);
+		var targetPreviewTexture = new RenderTexture(previewWidth, previewHeight, 24);
+
+		var oldTargetTexture = camera.targetTexture;
+		var oldOrthographic = camera.orthographic;
+		var oldFieldOfView = camera.fieldOfView;
+		var oldAspect = camera.aspect;
+#if !(UNITY_5_3 || UNITY_5_2 || UNITY_5_1 || UNITY_5_0)
+		var oldstereoTargetEye = camera.stereoTargetEye;
+		camera.stereoTargetEye = StereoTargetEyeMask.None;
+#endif
+		camera.fieldOfView = 60.0f;
+		camera.orthographic = false;
+		camera.targetTexture = targetPreviewTexture;
+		camera.aspect = 1.0f;
+		camera.Render();
+
+		// copy preview texture
+		RenderTexture.active = targetPreviewTexture;
+		previewTexture.ReadPixels(new Rect(0, 0, targetPreviewTexture.width, targetPreviewTexture.height), 0, 0);
+		RenderTexture.active = null;
+		camera.targetTexture = null;
+		Object.DestroyImmediate(targetPreviewTexture);
+
+		var fx = camera.gameObject.AddComponent<SteamVR_SphericalProjection>();
+
+		var oldPosition = target.transform.localPosition;
+		var oldRotation = target.transform.localRotation;
+		var basePosition = target.transform.position;
+		var baseRotation = Quaternion.Euler(0, target.transform.rotation.eulerAngles.y, 0);
+
+		var transform = camera.transform;
+
+		int vTotal = halfHeight / cellSize;
+		float dv = 90.0f / vTotal; // vertical degrees per segment
+		float dvHalf = dv / 2.0f;
+
+		var targetTexture = new RenderTexture(cellSize, cellSize, 24);
+		targetTexture.wrapMode = TextureWrapMode.Clamp;
+		targetTexture.antiAliasing = 8;
+
+		camera.fieldOfView = dv;
+		camera.orthographic = false;
+		camera.targetTexture = targetTexture;
+		camera.aspect = oldAspect;
+#if !(UNITY_5_3 || UNITY_5_2 || UNITY_5_1 || UNITY_5_0)
+		camera.stereoTargetEye = StereoTargetEyeMask.None;
+#endif
+
+		// Render sections of a sphere using a rectilinear projection
+		// and resample using a sphereical projection into a single panorama
+		// texture per eye.  We break into sections in order to keep the eye
+		// separation similar around the sphere.  Rendering alternates between
+		// top and bottom sections, sweeping horizontally around the sphere,
+		// alternating left and right eyes.
+		for (int v = 0; v < vTotal; v++)
+		{
+			var pitch = 90.0f - (v * dv) - dvHalf;
+			var uTotal = width / targetTexture.width;
+			var du = 360.0f / uTotal; // horizontal degrees per segment
+			var duHalf = du / 2.0f;
+
+			var vTarget = v * halfHeight / vTotal;
+
+			for (int i = 0; i < 2; i++) // top, bottom
+			{
+				if (i == 1)
+				{
+					pitch = -pitch;
+					vTarget = height - vTarget - cellSize;
+				}
+
+				for (int u = 0; u < uTotal; u++)
+				{
+					var yaw = -180.0f + (u * du) + duHalf;
+
+					var uTarget = u * width / uTotal;
+
+					var vTargetOffset = 0;
+					var xOffset = -ipd / 2 * Mathf.Cos(pitch * Mathf.Deg2Rad);
+
+					for (int j = 0; j < 2; j++) // left, right
+					{
+						if (j == 1)
+						{
+							vTargetOffset = height;
+							xOffset = -xOffset;
+						}
+
+						var offset = baseRotation * Quaternion.Euler(0, yaw, 0) * new Vector3(xOffset, 0, 0);
+						transform.position = basePosition + offset;
+
+						var direction = Quaternion.Euler(pitch, yaw, 0.0f);
+						transform.rotation = baseRotation * direction;
+
+						// vector pointing to center of this section
+						var N = direction * Vector3.forward;
+
+						// horizontal span of this section in degrees
+						var phi0 = yaw - (du / 2);
+						var phi1 = phi0 + du;
+
+						// vertical span of this section in degrees
+						var theta0 = pitch + (dv / 2);
+						var theta1 = theta0 - dv;
+
+						var midPhi = (phi0 + phi1) / 2;
+						var baseTheta = Mathf.Abs(theta0) < Mathf.Abs(theta1) ? theta0 : theta1;
+
+						// vectors pointing to corners of image closes to the equator
+						var V00 = Quaternion.Euler(baseTheta, phi0, 0.0f) * Vector3.forward;
+						var V01 = Quaternion.Euler(baseTheta, phi1, 0.0f) * Vector3.forward;
+
+						// vectors pointing to top and bottom midsection of image
+						var V0M = Quaternion.Euler(theta0, midPhi, 0.0f) * Vector3.forward;
+						var V1M = Quaternion.Euler(theta1, midPhi, 0.0f) * Vector3.forward;
+
+						// intersection points for each of the above
+						var P00 = V00 / Vector3.Dot(V00, N);
+						var P01 = V01 / Vector3.Dot(V01, N);
+						var P0M = V0M / Vector3.Dot(V0M, N);
+						var P1M = V1M / Vector3.Dot(V1M, N);
+
+						// calculate basis vectors for plane
+						var P00_P01 = P01 - P00;
+						var P0M_P1M = P1M - P0M;
+
+						var uMag = P00_P01.magnitude;
+						var vMag = P0M_P1M.magnitude;
+
+						var uScale = 1.0f / uMag;
+						var vScale = 1.0f / vMag;
+
+						var uAxis = P00_P01 * uScale;
+						var vAxis = P0M_P1M * vScale;
+
+						// update material constant buffer
+						fx.Set(N, phi0, phi1, theta0, theta1,
+							uAxis, P00, uScale,
+							vAxis, P0M, vScale);
+
+						camera.aspect = uMag / vMag;
+						camera.Render();
+
+						RenderTexture.active = targetTexture;
+						texture.ReadPixels(new Rect(0, 0, targetTexture.width, targetTexture.height), uTarget, vTarget + vTargetOffset);
+						RenderTexture.active = null;                 
+					}
+
+					// Update progress
+					var progress = (float)( v * ( uTotal * 2.0f ) + u + i*uTotal) / (float)(vTotal * ( uTotal * 2.0f ) );
+					OpenVR.Screenshots.UpdateScreenshotProgress(screenshotHandle, progress);
+				}
+			}
+		}
+
+		// 100% flush
+		OpenVR.Screenshots.UpdateScreenshotProgress(screenshotHandle, 1.0f);
+
+		// Save textures to disk.
+		// Add extensions
+		previewFilename += ".png";
+		VRFilename += ".png";
+
+		// Preview
+		previewTexture.Apply();
+		System.IO.File.WriteAllBytes(previewFilename, previewTexture.EncodeToPNG());
+
+		// VR
+		texture.Apply();
+		System.IO.File.WriteAllBytes(VRFilename, texture.EncodeToPNG());
+
+		// Cleanup.
+		if (camera != tempCamera)
+		{
+			camera.targetTexture = oldTargetTexture;
+			camera.orthographic = oldOrthographic;
+			camera.fieldOfView = oldFieldOfView;
+			camera.aspect = oldAspect;
+#if !(UNITY_5_3 || UNITY_5_2 || UNITY_5_1 || UNITY_5_0)
+			camera.stereoTargetEye = oldstereoTargetEye;
+#endif
+
+			target.transform.localPosition = oldPosition;
+			target.transform.localRotation = oldRotation;
+		}
+		else
+		{
+			tempCamera.targetTexture = null;
+		}
+
+		Object.DestroyImmediate(targetTexture);
+		Object.DestroyImmediate(fx);
+
+		timer.Stop();
+		Debug.Log(string.Format("Screenshot took {0} seconds.", timer.Elapsed));
+
+		if (tempCamera != null)
+		{
+			Object.DestroyImmediate(tempCamera.gameObject);
+		}
+
+		Object.DestroyImmediate(previewTexture);
+		Object.DestroyImmediate(texture);
 	}
 }
 

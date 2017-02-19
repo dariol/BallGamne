@@ -1,4 +1,4 @@
-﻿//========= Copyright 2014, Valve Corporation, All rights reserved. ===========
+﻿//======= Copyright (c) Valve Corporation, All rights reserved. ===============
 //
 // Purpose: For controlling in-game objects with tracked devices.
 //
@@ -34,7 +34,7 @@ public class SteamVR_TrackedObject : MonoBehaviour
 	public Transform origin; // if not set, relative to parent
     public bool isValid = false;
 
-	private void OnNewPoses(params object[] args)
+	private void OnNewPoses(TrackedDevicePose_t[] poses)
 	{
 		if (index == EIndex.None)
 			return;
@@ -42,7 +42,6 @@ public class SteamVR_TrackedObject : MonoBehaviour
 		var i = (int)index;
 
         isValid = false;
-		var poses = (Valve.VR.TrackedDevicePose_t[])args[0];
 		if (poses.Length <= i)
 			return;
 
@@ -58,12 +57,8 @@ public class SteamVR_TrackedObject : MonoBehaviour
 
 		if (origin != null)
 		{
-			pose = new SteamVR_Utils.RigidTransform(origin) * pose;
-			pose.pos.x *= origin.localScale.x;
-			pose.pos.y *= origin.localScale.y;
-			pose.pos.z *= origin.localScale.z;
-			transform.position = pose.pos;
-			transform.rotation = pose.rot;
+			transform.position = origin.transform.TransformPoint(pose.pos);
+			transform.rotation = origin.rotation * pose.rot;
 		}
 		else
 		{
@@ -72,14 +67,29 @@ public class SteamVR_TrackedObject : MonoBehaviour
 		}
 	}
 
+	SteamVR_Events.Action newPosesAction;
+
+	void Awake()
+	{
+		newPosesAction = SteamVR_Events.NewPosesAction(OnNewPoses);
+	}
+
 	void OnEnable()
 	{
-		SteamVR_Utils.Event.Listen("new_poses", OnNewPoses);
+		var render = SteamVR_Render.instance;
+		if (render == null)
+		{
+			enabled = false;
+			return;
+		}
+
+		newPosesAction.enabled = true;
 	}
 
 	void OnDisable()
 	{
-		SteamVR_Utils.Event.Remove("new_poses", OnNewPoses);
+		newPosesAction.enabled = false;
+		isValid = false;
 	}
 
 	public void SetDeviceIndex(int index)

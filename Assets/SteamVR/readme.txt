@@ -1,5 +1,5 @@
-SteamVR plugin for Unity - v1.0.7
-Copyright 2014-2015, Valve Corporation, All rights reserved.
+SteamVR plugin for Unity - v1.2.0
+Copyright (c) Valve Corporation, All rights reserved.
 
 
 Quickstart:
@@ -13,6 +13,146 @@ Requirements:
 The SteamVR runtime must be installed.  This can be found in Steam under Tools.
 
 The plugin currently only supports Windows / DX11.
+
+
+Changes for v1.2.0:
+
+* Updated to SteamVR runtime v1481926580 and SDK version 1.0.5.
+
+* Replaced SteamVR_Utils.Event with SteamVR_Events.<EventName> to avoid runtime memory allocation associated with use of params object[] args.
+
+* Added SteamVR_Events.<EventName>Action to make it easy to wrap callbacks to avoid memory allocation when components are frequently enabled/disabled at runtime.
+
+* Fixed other miscellaneous runtime memory allocation in SteamVR_Render and SteamVR_RenderModels.  (Suggestions by unity3d user @8bitgoose.)
+
+* Integrated fix for SteamVR_LaserPointer direction (from github user @fredsa).
+
+* Integrated fixes and comments for SteamVR_Teleporter (from github user @natewinck).
+
+* Removed SteamVR_Status and SteamVR_StatusText as they were using SteamVR_Utils.Event with generic strings which is no longer allowed.
+
+* Added SteamVR_Controller.assignAllBeforeIdentified (to allow controller to be assigned before identified as left vs right).  Suggested by github user @chrwoizi.
+
+* Added SteamVR_Controller.UpdateTargets public interface.  This allows spawning the component at runtime.  Suggested by github user @demonixis.
+
+* Fixed bug with SteamVR_TrackedObject when specifying origin.  Suggested by github user @fredsa.
+
+Known issues:
+
+* The current beta version of Unity 5.6 breaks the normal operation of the SteamVR_UpdatePoses component (required for tracked controllers).
+To work around this in the meantime, you will need to manually add the SteamVR_UpdatePoses component to your main camera.
+
+
+Changes for v1.1.1:
+
+* Updated to SteamVR runtime v1467410709 and SDK version 1.0.2.
+
+* Updated Copyright notice.
+
+* Added SteamVR_TrackedCamera for accessing tracked camera video stream and poses.
+
+* Added SteamVR_TestTrackedCamera scene and associated script to demonstrate how to use SteamVR_TrackedCamera.
+
+* Fix for SteamVR_Fade shader to account for changes in Unity 5.4.
+
+* SteamVR_GameView will now use the compositor's mirror texture to render the companion window (pre-Unity 5.4 only).
+
+* Renamed SteamVR_LoadLevel 'externalApp' to 'internalProcess' to reflect actual functionality.
+
+* Fixed issue with SteamVR_PlayArea material loading due to changes in Unity 5.4.
+
+* Added Screenshot support handling for stereo panoramas generation.
+
+* Removed code that was setting Time.maximumDeltaTime as this was causing issues.
+
+
+Changes for v1.1.0:
+
+* Fix for error building standalone in SteamVR_LoadLevel.
+
+* Set SteamVR_TrackedObject.isValid to false when disabled.
+
+
+Changes for v1.0.9:
+
+* Updated to SteamVR runtime v1461626459 and SDK version 0.9.20.
+
+* Updated workshop texture used in sea of cubes example level to use web page from SteamVR (was previously from Portal).
+
+* Updated various SDK changes to Unity in 5.4 betas.
+
+* Added controllerModeState to RenderModel component to control additional features like scrollwheel visibility.
+
+* RenderModels now respond to model skin changes.
+
+* Removed OnGUI and associated help text (i.e. "You may now put on your headset." notification) as this was causing unnecessary overhead.
+
+* Fix to SteamVR_Render not turning back on if all cameras were disabled and then re-enabled.
+
+* Hooked up SteamVR_Render.pauseRendering in Unity 5.4 native OpenVR integration.
+
+* Fix for input_focus event sometimes getting sent inappropriately.
+
+* Fix for timeScale handling.
+
+* Fix for SteamVR_PlayArea not finding its material in editor in Unity 5.4 due to changes in how Unity handles asset loading.
+
+* Miscellaneous fixes to reduce hitching when using SteamVR_LoadLevel to handle scene transitions.
+
+* Hooked up SteamVR_Camera.sceneResolutionScale to Unity 5.4's native vr integration render target scaling.
+
+* Forced SteamVR initialization check in SteamVR_Camera.enable (and bail upon failure) in Unity 5.4 (was already doing this in older builds).
+
+* Better handling of SteamVR_Ears component with old content.
+
+* Keep legacy head object around in case external components were referencing it (was previously getting deleted in Unity 5.4 as the head motion is now applied to the "eyes" object).
+
+* Miscellaneous fixes for SteamVR_TrackedController and SteamVR_Teleporter.
+
+* Fixed up Extra scenes SteamVR_TestThrow and SteamVR_TestIK.
+
+* Added stereo panorama screenshot support to SteamVR_Skybox.
+
+* Removed use of deprecated UnityEditorInternal.VR.VREditor.InitializeVRPlayerSettingsForBuildTarget(BuildTargetGroup.Standalone);
+
+
+Changes for v1.0.8:
+
+* Updated to SteamVR runtime v1457155403.
+
+* Updated to work with native OpenVR integration introduced in Unity 5.4.  In this and newer versions, openvr_api.dll will be automatically deleted when launching since it ships as part of Unity now.
+
+* C# interop now exports arrays as individual elements to avoid the associated memory allocation overhead passing data back and forth between native and managed code.
+
+* Applications should no longer call GetGenericInterface directly, but instead use the accessors provided by Valve.VR.OpenVR (e.g. OpenVR.System for the IVRSystem interface).
+
+* Added SteamVR_ExternalCamera for filming mixed reality videos.  Automatically enabled when externalcamera.cfg is added to the root of your projects (next to Assets or executable), and toggled by the presence of a third controller.
+
+* Render models updated to load asynchronously.  Sends "render_model_loaded" event when finished.
+
+* Added 'shader' property to render models to allow using alternate shaders. This also creates a dependency within the scene to ensure the shader is loaded in baked builds.
+
+* Fix for render model components not respecting render model scale.
+
+* SteamVR_Render.lockPhysicsUpdateRateToRenderFrequency now respects Time.timeScale.
+
+* SteamVR_LoadLevel now hides overlays when finished to avoid persisting performance degredation.
+
+* Added ability to launch external applications via SteamVR_LoadLevel.
+
+* Added option to load levels non-asynchronously in SteamVR_LoadLevel since Unity crashes on some content when using asyn loading.
+
+* SteamVR auto-disabled if initialization fails, to avoid continual retries.
+
+* Updated SteamVR_ControllerManager to get controller indices from the runtime (via IVRSystem.GetTrackedDeviceIndexForControllerRole).
+
+* SteamVR_ControllerManager now allows you to assign additional controllers to game objects.
+
+* [CameraRig] prefab now listens for a third controller connection which will enable mixed reality recording mode in the game view.
+
+* AudioListener is now transferred to a child of the eye camera called "ears" to allow controlling rotation independently when using speakers instead of headphones.
+
+* Flare Layer is no longer transferred from eye camera to game view camera.
 
 
 Changes for v1.0.7:
@@ -220,8 +360,7 @@ up and running quickly and easily.  You are encouraged to modify these to suit y
 and provide feedback at http://steamcommunity.com/app/250820 or http://steamcommunity.com/app/358720/discussions
 
 Assets/SteamVR/Scenes/example.unity - A sample scene demonstrating the functionality provided by this plugin.   
-This also shows you how to set up a separate camera for rendering gui elements, and handle events to display  
-hmd status.
+This also shows you how to set up a separate camera for rendering gui elements.
 
 
 Details:
@@ -271,8 +410,7 @@ Prefabs:
 SteamVR_Camera component added to it, and the Expand button clicked.  It also includes a full set of Tracked Devices
 which will display and follow any connected tracked devices (e.g. controllers, base stations and cameras).
 
-[Status] - This is a set of components for providing various status info.  You can add it to your scene to get
-notifications for leaving the tracking bounds, et cetera.  It also includes an escape menu for tweaking options.
+[Status] - The prefab is for demonstration purposes only.  It adds an escape menu to your scene.
 Note: It uses the SteamVR_Overlay component, which is rather expensive rendering-wise.
 
 [SteamVR] - This object controls some global settings for SteamVR, most notably Tracking Space.  Legacy projects
@@ -326,27 +464,20 @@ and right culling mask to use to control rendering per eye if necessary.
 
 Events:
 
-SteamVR_Camera fires off several events.  These can be handled by registering for them through  
-SteamVR_Utils.Event.Listen.  Be sure to remove your handler when no longer needed.  The best pattern is to  
-Listen and Remove in OnEnable and OnDisable respectively.
+SteamVR fires off several events.  These can be handled by registering for them through
+SteamVR_Events.<EventType>.Listen.  Be sure to remove your handler when no longer needed.
+The best pattern is to Listen and Remove in OnEnable and OnDisable respectively.
 
-"initializing" - This event is sent when the hmd's tracking status changes to or from Unitialized.
+Initializing - This event is sent when the hmd's tracking status changes to or from Unitialized.
 
-"calibrating" - This event is sent when starting or stopping calibration with the new state.
+Calibrating - This event is sent when starting or stopping calibration with the new state.
 
-"out_of_range" - This event is sent when losing or reacquiring absolute positional tracking.  This will 
+OutOfRange - This event is sent when losing or reacquiring absolute positional tracking.  This will 
 never fire for the Rift DK1 since it does not have positional tracking.  For camera based trackers, this 
 happens when the hmd exits and enters the camera's view.
 
-"device_connected" - This event is sent when devices are connected or disconnected.  The device index is passed
+DeviceConnected - This event is sent when devices are connected or disconnected.  The device index is passed
 as the first argument, and the connected status (true / false) as the second argument.
-
-Feel free to leverage this system to fire off events of your own.  SteamVR_Utils.Event.Send takes any number  
-of parameters, and passes them on to all registered callbacks.
-
-A helper class has been included called SteamVR_Status which leverages these events to display hmd status to  
-the user.  Examples of this can be found in the example scene.  SteamVR_StatusText specifically, leverages this
-functionality to wrap up GUIText display, overriding SetAlpha.
 
 
 Keybindings (if using the [Status] prefab):

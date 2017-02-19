@@ -1,11 +1,11 @@
-﻿//========= Copyright 2014, Valve Corporation, All rights reserved. ===========
+﻿//======= Copyright (c) Valve Corporation, All rights reserved. ===============
 //
 // Purpose: Generates a mesh based on field of view.
 //
 //=============================================================================
 
 using UnityEngine;
-using System.Collections;
+using Valve.VR;
 
 [ExecuteInEditMode, RequireComponent(typeof(MeshRenderer), typeof(MeshFilter))]
 public class SteamVR_Frustum : MonoBehaviour
@@ -87,43 +87,41 @@ public class SteamVR_Frustum : MonoBehaviour
 		GetComponent<MeshFilter>().mesh = mesh;
 	}
 
-	private void OnDeviceConnected(params object[] args)
+	private void OnDeviceConnected(int i, bool connected)
 	{
-		var i = (int)args[0];
 		if (i != (int)index)
 			return;
 
 		GetComponent<MeshFilter>().mesh = null;
 
-		var connected = (bool)args[1];
 		if (connected)
 		{
-			var vr = SteamVR.instance;
-			if (vr.hmd.GetTrackedDeviceClass((uint)i) == Valve.VR.ETrackedDeviceClass.TrackingReference)
+			var system = OpenVR.System;
+			if (system != null && system.GetTrackedDeviceClass((uint)i) == ETrackedDeviceClass.TrackingReference)
 			{
-				var error = Valve.VR.ETrackedPropertyError.TrackedProp_Success;
-				var result = vr.hmd.GetFloatTrackedDeviceProperty((uint)i, Valve.VR.ETrackedDeviceProperty.Prop_FieldOfViewLeftDegrees_Float, ref error);
-				if (error == Valve.VR.ETrackedPropertyError.TrackedProp_Success)
+				var error = ETrackedPropertyError.TrackedProp_Success;
+				var result = system.GetFloatTrackedDeviceProperty((uint)i, ETrackedDeviceProperty.Prop_FieldOfViewLeftDegrees_Float, ref error);
+				if (error == ETrackedPropertyError.TrackedProp_Success)
 					fovLeft = result;
 
-				result = vr.hmd.GetFloatTrackedDeviceProperty((uint)i, Valve.VR.ETrackedDeviceProperty.Prop_FieldOfViewRightDegrees_Float, ref error);
-				if (error == Valve.VR.ETrackedPropertyError.TrackedProp_Success)
+				result = system.GetFloatTrackedDeviceProperty((uint)i, ETrackedDeviceProperty.Prop_FieldOfViewRightDegrees_Float, ref error);
+				if (error == ETrackedPropertyError.TrackedProp_Success)
 					fovRight = result;
 
-				result = vr.hmd.GetFloatTrackedDeviceProperty((uint)i, Valve.VR.ETrackedDeviceProperty.Prop_FieldOfViewTopDegrees_Float, ref error);
-				if (error == Valve.VR.ETrackedPropertyError.TrackedProp_Success)
+				result = system.GetFloatTrackedDeviceProperty((uint)i, ETrackedDeviceProperty.Prop_FieldOfViewTopDegrees_Float, ref error);
+				if (error == ETrackedPropertyError.TrackedProp_Success)
 					fovTop = result;
 
-				result = vr.hmd.GetFloatTrackedDeviceProperty((uint)i, Valve.VR.ETrackedDeviceProperty.Prop_FieldOfViewBottomDegrees_Float, ref error);
-				if (error == Valve.VR.ETrackedPropertyError.TrackedProp_Success)
+				result = system.GetFloatTrackedDeviceProperty((uint)i, ETrackedDeviceProperty.Prop_FieldOfViewBottomDegrees_Float, ref error);
+				if (error == ETrackedPropertyError.TrackedProp_Success)
 					fovBottom = result;
 
-				result = vr.hmd.GetFloatTrackedDeviceProperty((uint)i, Valve.VR.ETrackedDeviceProperty.Prop_TrackingRangeMinimumMeters_Float, ref error);
-				if (error == Valve.VR.ETrackedPropertyError.TrackedProp_Success)
+				result = system.GetFloatTrackedDeviceProperty((uint)i, ETrackedDeviceProperty.Prop_TrackingRangeMinimumMeters_Float, ref error);
+				if (error == ETrackedPropertyError.TrackedProp_Success)
 					nearZ = result;
 
-				result = vr.hmd.GetFloatTrackedDeviceProperty((uint)i, Valve.VR.ETrackedDeviceProperty.Prop_TrackingRangeMaximumMeters_Float, ref error);
-				if (error == Valve.VR.ETrackedPropertyError.TrackedProp_Success)
+				result = system.GetFloatTrackedDeviceProperty((uint)i, ETrackedDeviceProperty.Prop_TrackingRangeMaximumMeters_Float, ref error);
+				if (error == ETrackedPropertyError.TrackedProp_Success)
 					farZ = result;
 
 				UpdateModel();
@@ -134,12 +132,12 @@ public class SteamVR_Frustum : MonoBehaviour
 	void OnEnable()
 	{
 		GetComponent<MeshFilter>().mesh = null;
-		SteamVR_Utils.Event.Listen("device_connected", OnDeviceConnected);
+		SteamVR_Events.DeviceConnected.Listen(OnDeviceConnected);
 	}
 
 	void OnDisable()
 	{
-		SteamVR_Utils.Event.Remove("device_connected", OnDeviceConnected);
+		SteamVR_Events.DeviceConnected.Remove(OnDeviceConnected);
 		GetComponent<MeshFilter>().mesh = null;
 	}
 

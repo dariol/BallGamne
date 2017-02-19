@@ -1,24 +1,44 @@
-﻿//========= Copyright 2014, Valve Corporation, All rights reserved. ===========
+﻿//======= Copyright (c) Valve Corporation, All rights reserved. ===============
 //
 // Purpose: Handles rendering to the game view window
 //
 //=============================================================================
 
 using UnityEngine;
+using Valve.VR;
 
 [RequireComponent(typeof(Camera))]
 public class SteamVR_GameView : MonoBehaviour
 {
+#if (UNITY_5_3 || UNITY_5_2 || UNITY_5_1 || UNITY_5_0) // DEPRECATED in Unity 5.4+
 	public float scale = 1.5f;
 	public bool drawOverlay = true;
 
 	static Material overlayMaterial;
+	static Texture2D mirrorTexture;
 
 	void OnEnable()
 	{
 		if (overlayMaterial == null)
 		{
 			overlayMaterial = new Material(Shader.Find("Custom/SteamVR_Overlay"));
+		}
+
+		// Use OpenVR's mirror texture if available.
+		if (mirrorTexture == null)
+		{
+			var vr = SteamVR.instance;
+			if (vr != null && vr.textureType == ETextureType.DirectX)
+            {
+				var tex = new Texture2D(2, 2);
+				var nativeTex = System.IntPtr.Zero;
+				if (vr.compositor.GetMirrorTextureD3D11(EVREye.Eye_Right, tex.GetNativeTexturePtr(), ref nativeTex) == EVRCompositorError.None)
+				{
+					uint width = 0, height = 0;
+					OpenVR.System.GetRecommendedRenderTargetSize(ref width, ref height);
+					mirrorTexture = Texture2D.CreateExternalTexture((int)width, (int)height, TextureFormat.RGBA32, false, false, nativeTex);
+				}
+			}
 		}
 	}
 
@@ -34,14 +54,18 @@ public class SteamVR_GameView : MonoBehaviour
 		var y1 = -aspect;
 
 		var blitMaterial = SteamVR_Camera.blitMaterial;
-		blitMaterial.mainTexture = SteamVR_Camera.GetSceneTexture(camera.hdr);
+
+		if (mirrorTexture != null)
+			blitMaterial.mainTexture = mirrorTexture;
+		else
+			blitMaterial.mainTexture = SteamVR_Camera.GetSceneTexture(camera.hdr);
 
 		GL.PushMatrix();
 		GL.LoadOrtho();
-#if UNITY_5_0
-		blitMaterial.SetPass(QualitySettings.activeColorSpace == ColorSpace.Linear ? 1 : 0);
-#else
+#if !(UNITY_5_0)
 		blitMaterial.SetPass(0);
+#else
+		blitMaterial.SetPass(QualitySettings.activeColorSpace == ColorSpace.Linear ? 1 : 0);
 #endif
 		GL.Begin(GL.QUADS);
 		GL.TexCoord2(0.0f, 0.0f); GL.Vertex3(x0, y0, 0);
@@ -64,10 +88,10 @@ public class SteamVR_GameView : MonoBehaviour
 
 			GL.PushMatrix();
 			GL.LoadOrtho();
-#if UNITY_5_0
-			overlayMaterial.SetPass(0);
-#else
+#if !(UNITY_5_0)
 			overlayMaterial.SetPass(QualitySettings.activeColorSpace == ColorSpace.Linear ? 1 : 0);
+#else
+			overlayMaterial.SetPass(0);
 #endif
 			GL.Begin(GL.QUADS);
 			GL.TexCoord2(u0, v0); GL.Vertex3(-1, -1, 0);
@@ -78,5 +102,6 @@ public class SteamVR_GameView : MonoBehaviour
 			GL.PopMatrix();
 		}
 	}
+#endif
 }
 
