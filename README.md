@@ -1,15 +1,11 @@
-Hi Friends!
+This is a fork of Cabbibo’s “BallGamne”, an earlier build of “Blarp!”.
+https://github.com/cabbibo/BallGamne
 
-So I realized this didn't have a readme, which is super poor form.
+Please thank Cabbibo for his generosity with this open source by purchasing “Blarp!” on Steam: http://store.steampowered.com/app/420840/
 
-To run the project, simply download, and open it as a new project in Unity!
+I’m calling this fork “Blarp-d” as I’ve added initial support for co-op play with a Vive Tracker (downloadable build forthcoming) - see commit for more info.
 
-The code is definitely sloppy because I don't quite understand how 
-Unity code should be structured, so if you have a specific question, 
-please shoot me an email: isaaclandoncohen@gmail.com
+Now either have a friend with a tracker help you avoid getting Blarp’d or make it more challenging.
 
-The shaders are pretty fun / usuable code, the Room.cs shows a nice 
-demo of compute shaders, and I like a few of the pieces of VR code.
+Cleaned up build to work with Unity 5.5.2 and SteamVR Unity plugin 1.2 (1.2.1 is ok too)
 
-Other than that, you might be wading through some trash, so please
-let me help you make it through the swamps of dagoba
